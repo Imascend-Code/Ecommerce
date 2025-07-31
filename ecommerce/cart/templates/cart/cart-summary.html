@@ -1,7 +1,7 @@
 {% extends "store/base.html" %}
 {% load static %}
+{% load humanize %}
 {% load mathfilters %}
-
 {% block content %}
 
 <style>
@@ -43,10 +43,16 @@
                   <a href="{{ product.get_absolute_url }}" class="text-decoration-none">
                     <h2 class="h6 text-primary">{{ product.title }}</h2>
                   </a>
-                  <div class="text-muted small">Price: ${{ product.price }}</div>
+                  <div class="text-muted small">
+                    USD: ${{ item.price }}<br>
+                    UGX: UGX {{ item.ugx_price|intcomma }}
+                  </div>
                 </div>
                 <div class="text-end">
-                  <span class="h6 fw-bold text-primary">${{ product.price|mul:item.qty }}</span>
+                  <div class="h6 fw-bold text-primary">
+                    USD ${{ item.total }}<br>
+                    <small class="text-muted">UGX {{ item.ugx_total|intcomma }}</small>
+                  </div>
                 </div>
               </div>
 
@@ -79,7 +85,12 @@
 
         <div class="d-flex justify-content-end mt-4">
           <div class="text-end">
-            <div class="h5 fw-bold mb-3 text-primary">Total: $<span id="total">{{ cart.get_total }}</span></div>
+            <div class="h5 fw-bold mb-1 text-primary">
+              Total (USD): $<span id="total">{{ cart.get_total }}</span>
+            </div>
+            <div class="text-muted mb-3">
+              ≈ UGX <span id="total-ugx">{{ total_ugx|intcomma }}</span>
+            </div>
             <a href="{% url 'checkout' %}" class="btn btn-custom-primary btn-lg">
               <i class="fas fa-chevron-circle-right me-2"></i> Proceed to Checkout
             </a>
@@ -90,9 +101,9 @@
   </div>
 </main>
 
-<!-- Keep your existing JavaScript exactly as is -->
+<!-- ✅ JavaScript -->
 <script>
-  // Delete button
+  // Delete item from cart
   $(document).on('click', '.delete-button', function(e){
     e.preventDefault();
     $.ajax({
@@ -100,19 +111,22 @@
         url: '{% url "cart-delete" %}',
         data: {
             product_id: $(this).data('index'),
-            csrfmiddlewaretoken: "{{csrf_token}}",
+            csrfmiddlewaretoken: "{{ csrf_token }}",
             action: 'post'
         },
         success: function(json){
+            document.getElementById("cart-qty").textContent = json.qty;
+            document.getElementById("total").textContent = json.total;
+            document.getElementById("total-ugx").textContent = new Intl.NumberFormat().format(json.total_ugx);
             location.reload();
-            document.getElementById("cart-qty").textContent = json.qty
-            document.getElementById("total").textContent = json.total
         },
-        error: function(xhr, errmsg, err){}
+        error: function(xhr, errmsg, err){
+            alert("Error deleting item.");
+        }
     });
-  })
+  });
 
-  // Update button
+  // Update cart item quantity
   $(document).on('click', '.update-button', function(e){
     e.preventDefault();
     var theproductid = $(this).data('index');
@@ -120,20 +134,22 @@
         type: 'POST',
         url: '{% url "cart-update" %}',
         data: {
-            product_id: $(this).data('index'),
+            product_id: theproductid,
             product_quantity: $('#select' + theproductid + ' option:selected').text(),
-            csrfmiddlewaretoken: "{{csrf_token}}",
+            csrfmiddlewaretoken: "{{ csrf_token }}",
             action: 'post'
         },
         success: function(json){
+            document.getElementById("cart-qty").textContent = json.qty;
+            document.getElementById("total").textContent = json.total;
+            document.getElementById("total-ugx").textContent = new Intl.NumberFormat().format(json.total_ugx);
             location.reload();
-            document.getElementById("cart-qty").textContent = json.qty
-            document.getElementById("total").textContent = json.total
         },
-        error: function(xhr, errmsg, err){}
+        error: function(xhr, errmsg, err){
+            alert("Error updating item.");
+        }
     });
-  })
+  });
 </script>
-
 
 {% endblock %}

@@ -11,8 +11,10 @@ def cart_summary(request):
 
     cart = Cart(request)
 
-    return render(request, 'cart/cart-summary.html', {'cart':cart})
-
+    return render(request, 'cart/cart-summary.html', {
+    'cart': cart,
+    'total_ugx': cart.get_total_ugx()
+})
 
 
 def cart_add(request):

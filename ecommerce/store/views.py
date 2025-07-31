@@ -28,19 +28,24 @@ def categories(request):
 
 
 def list_category(request, category_slug=None):
-
     category = get_object_or_404(Category, slug=category_slug)
-
     products = Product.objects.filter(category=category)
 
+    # Calculate UGX price for each product
+    for product in products:
+        product.ugx_price = round(product.price * 3500)
 
-    return render(request, 'store/list-category.html', {'category':category, 'products':products})
+    return render(request, 'store/list-category.html', {
+        'category': category,
+        'products': products
+    })
 
 
 
 def product_info(request, product_slug):
 
     product = get_object_or_404(Product, slug=product_slug)
+    product.ugx_price = product.price * 3500 
 
     context = {'product': product}
 
