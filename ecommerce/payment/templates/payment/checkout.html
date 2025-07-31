@@ -38,6 +38,13 @@
         height: 30px;
         margin-right: 10px;
     }
+
+    .pay-btn{
+
+        border-radius: 30px;
+        height: 55px;
+
+    }
 </style>
 
 <div class="checkout-container py-5">
@@ -129,7 +136,7 @@
                         <!-- Flutterwave -->
                         <div class="col-md-6 mb-3">
                             <div class="payment-method" id="flutterwave-method">
-                                <div class="form-check">
+                                <div class="form-check ">
                                     <input class="form-check-input" type="radio" name="paymentMethod" 
                                         id="flutterwaveOption" value="flutterwave">
                                     <label class="form-check-label fw-bold" for="flutterwaveOption">
@@ -141,20 +148,25 @@
                         </div>
 
                         <!-- Stripe (Placeholder) -->
+                      <!-- Stripe -->
                         <div class="col-md-6 mb-3">
                             <div class="payment-method" id="stripe-method">
-                                <div class="form-check">
+                                <div class="form-check ">
                                     <input class="form-check-input" type="radio" name="paymentMethod" 
                                         id="stripeOption" value="stripe">
                                     <label class="form-check-label fw-bold" for="stripeOption">
                                         <i class="fab fa-stripe-s me-2"></i>Pay with Stripe
                                     </label>
                                 </div>
-                                <p class="small text-muted mt-2 mb-0">Stripe coming soon...</p>
-                                <button type="button" class="btn btn-secondary w-100 mt-2" disabled>
-                                    Coming Soon
-                                </button>
+                                <p class="small text-muted mt-2 mb-0">Secure payment with Stripe</p>
                             </div>
+                        </div>
+
+                        <!-- Stripe Button Container (Initially hidden) -->
+                        <div id="stripe-button-container" class="payment-btn-container mb-4" style="display: none;">
+                            <button type="button" id="stripe-checkout-btn" class="btn btn-primary w-100 pay-btn">
+                                <i class="fab fa-stripe-s me-2"></i>Pay with Stripe
+                            </button>
                         </div>
                     </div>
 
@@ -163,7 +175,7 @@
 
                     <!-- Flutterwave Button Container -->
                     <div id="flutterwave-button-container" class="payment-btn-container mb-4" style="display: none;">
-                        <button type="button" id="flutterwave-checkout" class="btn btn-success w-100">
+                        <button type="button" id="flutterwave-checkout" class="btn btn-success w-100 pay-btn">
                             <i class="fas fa-bolt me-2"></i>Pay with Flutterwave
                         </button>
                     </div>
@@ -177,29 +189,15 @@
 <!-- PayPal SDK -->
  <script src="https://checkout.flutterwave.com/v3.js"></script>
 
+ <script src="https://js.stripe.com/v3/"></script>
+
 <script src="https://www.paypal.com/sdk/js?client-id=ATzHmCbJnoTjts1t5EbnRcWpCQ92BxeHvy1xFjdQMqmkUfDts7s7KYko8OFPmvK4vGtnn0J2Xj-kxWfg&currency=USD&intent=capture&enable-funding=venmo" 
         data-sdk-integration-source="integrationbuilder"></script>
 
 <script>
-    // Total price from cart
     const total_price = '{{ cart.get_total }}';
 
-
-
-    document.querySelectorAll('.payment-method').forEach(method => {
-    method.addEventListener('click', function () {
-        document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('active'));
-        this.classList.add('active');
-
-        const selectedMethod = this.querySelector('input[type="radio"]').value;
-
-        document.getElementById('paypal-button-container').style.display = selectedMethod === 'paypal' ? 'block' : 'none';
-        document.getElementById('flutterwave-button-container').style.display = selectedMethod === 'flutterwave' ? 'block' : 'none';
-    });
-});
-
-
-    // Handle active state for payment methods
+    // Payment method selection handler
     document.querySelectorAll('.payment-method').forEach(method => {
         method.addEventListener('click', function () {
             document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('active'));
@@ -208,65 +206,65 @@
             const selectedMethod = this.querySelector('input[type="radio"]').value;
 
             document.getElementById('paypal-button-container').style.display = selectedMethod === 'paypal' ? 'block' : 'none';
+            document.getElementById('flutterwave-button-container').style.display = selectedMethod === 'flutterwave' ? 'block' : 'none';
+            document.getElementById('stripe-button-container').style.display = selectedMethod === 'stripe' ? 'block' : 'none';
         });
     });
 
-    // Flutterwave Inline Payment
+    // Flutterwave Checkout
     document.getElementById('flutterwave-checkout').addEventListener('click', function () {
-    const name = document.getElementById('name').value.trim();
-    const email = document.getElementById('email').value.trim();
+        const name = document.getElementById('name').value.trim();
+        const email = document.getElementById('email').value.trim();
 
-    if (!name || !email) {
-        alert("Please enter both name and email.");
-        return;
-    }
-
-    FlutterwaveCheckout({
-        public_key: "FLWPUBK_TEST-9e1f1941e288deadfecbc106204faea4-X",
-        tx_ref: "TXREF_" + Date.now(),
-        amount: parseFloat("{{ cart.get_total|default:0|floatformat:'2' }}"),
-        currency: "UGX",
-        payment_options: "card, mobilemoneyuganda",
-        customer: {
-            email: email,
-            name: name,
-        },
-        customizations: {
-            title: "Weiboo",
-            description: "Order Payment",
-            logo: "{% static 'images/logo.png' %}"
-        },
-        callback: function (response) {
-            console.log("Payment completed:", response);
-            // Send to backend for order completion
-            $.post("{% url 'complete-order' %}", {
-                name: name,
-                email: email,
-                address1: $('#address1').val(),
-                address2: $('#address2').val(),
-                city: $('#city').val(),
-                state: $('#state').val(),
-                zipcode: $('#zipcode').val(),
-                payment_method: 'flutterwave',
-                transaction_id: response.transaction_id,
-                tx_ref: response.tx_ref,
-                csrfmiddlewaretoken: "{{ csrf_token }}",
-                action: 'post'
-            }).done(function (res) {
-                if (res.success) {
-                    window.location.href = "{% url 'payment-success' %}";
-                } else {
-                    alert("Payment failed: " + (res.message || "Try again."));
-                }
-            }).fail(function () {
-                alert("Something went wrong.");
-            });
-        },
-        onclose: function () {
-            console.log("Flutterwave modal closed");
+        if (!name || !email) {
+            alert("Please enter both name and email.");
+            return;
         }
+
+        FlutterwaveCheckout({
+            public_key: "FLWPUBK_TEST-9e1f1941e288deadfecbc106204faea4-X",
+            tx_ref: "TXREF_" + Date.now(),
+            amount: parseFloat("{{ cart.get_total|default:0|floatformat:'2' }}") * 3500,
+            currency: "UGX",
+            payment_options: "card, mobilemoneyuganda",
+            customer: {
+                email: email,
+                name: name,
+            },
+            customizations: {
+                title: "Weiboo",
+                description: "Order Payment",
+                logo: "{% static 'images/logo.png' %}"
+            },
+            callback: function (response) {
+                $.post("{% url 'complete-order' %}", {
+                    name: name,
+                    email: email,
+                    address1: $('#address1').val(),
+                    address2: $('#address2').val(),
+                    city: $('#city').val(),
+                    state: $('#state').val(),
+                    zipcode: $('#zipcode').val(),
+                    payment_method: 'flutterwave',
+                    transaction_id: response.transaction_id,
+                    tx_ref: response.tx_ref,
+                    csrfmiddlewaretoken: "{{ csrf_token }}",
+                    action: 'post'
+                }).done(function (res) {
+                    if (res.success) {
+                        window.location.href = "{% url 'payment-success' %}";
+                    } else {
+                        alert("Payment failed: " + (res.message || "Try again."));
+                    }
+                }).fail(function () {
+                    alert("Something went wrong.");
+                });
+            },
+            onclose: function () {
+                console.log("Flutterwave modal closed");
+            }
+        });
     });
-});
 
     // PayPal Buttons
     const paypalButtonsComponent = paypal.Buttons({
@@ -280,11 +278,9 @@
 
         onInit: function (data, actions) {
             actions.disable();
-
             document.querySelectorAll('.validate').forEach(input => {
                 input.addEventListener('input', () => validateForm(actions));
             });
-
             validateForm(actions);
         },
 
@@ -299,7 +295,7 @@
         },
 
         onApprove: function (data, actions) {
-            return actions.order.capture().then(function (details) {
+            return actions.order.capture().then(function () {
                 $.ajax({
                     type: 'POST',
                     url: '{% url "complete-order" %}',
@@ -315,7 +311,7 @@
                         csrfmiddlewaretoken: "{{ csrf_token }}",
                         action: 'post'
                     },
-                    success: function (response) {
+                    success: function () {
                         window.location.replace("{% url 'payment-success' %}");
                     },
                     error: function () {
@@ -334,7 +330,39 @@
         console.error("PayPal render failed:", err);
     });
 
-    // Enable PayPal only if form is valid
+    // Stripe Checkout Handler
+    document.getElementById("stripe-checkout-btn").addEventListener("click", function () {
+        const name = document.getElementById("name").value.trim();
+        const email = document.getElementById("email").value.trim();
+
+        if (!name || !email) {
+            alert("Please enter your name and email before proceeding.");
+            return;
+        }
+
+        fetch("{% url 'create-stripe-session' %}", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+                "Content-Type": "application/json"
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.id) {
+                const stripe = Stripe("pk_test_51RqtSbPGtlRggTulPf7CxVLVXqh28YQpdnZzOBG2w5yZA7CqXFnrY04fg9MKiWoNnLKxlLpdMZtGeGhftwofW2G300v2stXWU6");
+                stripe.redirectToCheckout({ sessionId: data.id });
+            } else {
+                alert("Failed to initiate Stripe checkout: " + (data.error || "Try again."));
+            }
+        })
+        .catch(error => {
+            console.error("Stripe error:", error);
+            alert("An error occurred during Stripe checkout.");
+        });
+    });
+
+    // Form validation
     function validateForm(actions) {
         let isValid = true;
         document.querySelectorAll('.validate[required]').forEach(input => {
@@ -350,7 +378,7 @@
         }
     }
 
-    // Bootstrap form validation
+    // Bootstrap validation
     (function () {
         'use strict';
         var forms = document.querySelectorAll('.needs-validation');

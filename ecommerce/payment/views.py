@@ -4,6 +4,13 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import ShippingAddress, Order, OrderItem
 from cart.cart import Cart
 from .payment_processor import MobileMoneyProcessor
+import stripe
+from django.conf import settings
+from django.http import JsonResponse
+
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
 
 def checkout(request):
     if request.user.is_authenticated:
@@ -146,6 +153,37 @@ def verify_mobile_money(request):
             return JsonResponse({'success': False, 'message': 'Invalid order'})
 
     return JsonResponse({'success': False, 'message': 'Invalid request'})
+
+
+
+@csrf_exempt
+def create_stripe_checkout_session(request):
+    if request.method == 'POST':
+        try:
+            cart = Cart(request)
+            total_amount = int(float(cart.get_total()) * 100)  # Stripe expects cents (USD), not UGX
+      
+
+            session = stripe.checkout.Session.create(
+                payment_method_types=['card'],
+                line_items=[{
+                    'price_data': {
+                        'currency': 'usd',
+                        'product_data': {
+                            'name': 'Order from Weiboo',
+                        },
+                        'unit_amount': total_amount,
+                    },
+                    'quantity': 1,
+                }],
+                mode='payment',
+                success_url=request.build_absolute_uri('/payment/success/'),
+                cancel_url=request.build_absolute_uri('/payment/failed/'),
+            )
+            return JsonResponse({'id': session.id})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+    return JsonResponse({'error': 'Invalid request'}, status=400)
 
 
 def payment_success(request):

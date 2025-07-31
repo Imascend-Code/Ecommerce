@@ -11,6 +11,7 @@ urlpatterns = [
     path('payment-failed', views.payment_failed, name='payment-failed'),
     path('verify-mobile-money/', views.verify_mobile_money, name='verify-mobile-money'),
     path('flutterwave-webhook/', flutterwave_webhook, name='flutterwave-webhook'),
+    path('create-stripe-session/', views.create_stripe_checkout_session, name='create-stripe-session'),
 
 ]
 
