@@ -1,5 +1,7 @@
 {% extends "./base.html" %}
 {% load static %}
+ 
+{% load humanize %}
 
 {% block content %}
 
@@ -27,14 +29,14 @@
 <div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel">
   <div class="carousel-inner">
     <div class="carousel-item active">
-      <img src="{% static 'images/hero1.jpg' %}" class="d-block w-100" alt="Banner 1">
+      <img src="{% static 'images/hero4.png' %}" class="d-block w-100" alt="Banner 1">
       <div class="carousel-caption d-none d-md-block">
         <h5 class="fw-bolds">Discover Premium Digital Products</h5>
         <p>Find the tools you need to level up your workflow.</p>
       </div>
     </div>
     <div class="carousel-item">
-      <img src="{% static 'images/hero2.jpg' %}" class="d-block w-100" alt="Banner 2">
+      <img src="{% static 'images/hero6.png' %}" class="d-block w-100" alt="Banner 2">
       <div class="carousel-caption d-none d-md-block">
         <h5 class="fw-bolds">Built for Creators & Innovators</h5>
         <p>Explore assets that unlock your potential.</p>
@@ -97,17 +99,33 @@
             <div class="ratio ratio-1x1">
               <img class="img-fluid p-3 object-fit-contain" src="{{product.image.url}}" alt="{{product.title}}">
             </div>
-            <div class="card-body pt-0">
-              <h3 class="h6 card-title mb-1 text-truncate">{{product.title|capfirst}}</h3>
-              <div class="d-flex justify-content-between align-items-center">
-                <span class="text-primary fw-bold">${{product.price}}</span>
-                {% if product.in_stock %}
-                <span class="badge bg-success">In Stock</span>
-                {% else %}
-                <span class="badge bg-secondary">In Stock</span>
-                {% endif %}
-              </div>
-            </div>
+             
+
+            <div class="card-body pt-2">
+  <h3 class="h6 card-title mb-2 text-truncate">{{ product.title|capfirst }}</h3>
+
+  <!-- Prices section -->
+  <div class="mb-2">
+    <div class="d-flex flex-column">
+      <span class="fw-bold text-dark">
+        <i class="fas fa-dollar-sign me-1 text-primary"></i> {{ product.price }}
+      </span>
+      <small class="text-muted">
+        <i class="fas fa-money-bill-wave me-1 text-secondary"></i> UGX {{ product.ugx_price|intcomma }}
+      </small>
+    </div>
+  </div>
+
+  <!-- Stock badge -->
+  <div>
+    {% if product.in_stock %}
+      <span class="badge bg-success">In Stock</span>
+    {% else %}
+      <span class="badge bg-success">In Stock</span>
+    {% endif %}
+  </div>
+</div>
+
           </a>
         </div>
       </div>

@@ -7,7 +7,7 @@ from .payment_processor import MobileMoneyProcessor
 import stripe
 from django.conf import settings
 from django.http import JsonResponse
-
+from django.urls import reverse
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -177,8 +177,8 @@ def create_stripe_checkout_session(request):
                     'quantity': 1,
                 }],
                 mode='payment',
-                success_url=request.build_absolute_uri('/payment/success/'),
-                cancel_url=request.build_absolute_uri('/payment/failed/'),
+                success_url = request.build_absolute_uri(reverse('payment-success')),
+                cancel_url = request.build_absolute_uri(reverse('payment-failed')),
             )
             return JsonResponse({'id': session.id})
         except Exception as e:

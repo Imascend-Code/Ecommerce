@@ -8,6 +8,10 @@ from django.shortcuts import get_object_or_404
 def store(request):
 
     all_products = Product.objects.all()
+    
+     # Pre-calculate UGX prices (assume 1 USD = 3500 UGX)
+    for product in all_products:
+        product.ugx_price = round(product.price * 3500)
 
     context = {'my_products':all_products}
 
