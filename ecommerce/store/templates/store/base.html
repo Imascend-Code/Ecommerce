@@ -25,6 +25,9 @@
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+
 
     <script>
         if ('serviceWorker' in navigator) {
@@ -103,14 +106,10 @@
                     <li class="nav-item ms-2">
                         <a href="{% url 'cart-summary' %}" class="nav-link cart-btn position-relative">
                             <i class="fas fa-shopping-cart"></i>
-                            <span class="cart-count">
-                                {% with qty_amount=cart|length %}
-                                    {% if qty_amount > 0 %}
-                                        {{ qty_amount }}
-                                    {% else %}
-                                        0
-                                    {% endif %}
-                                {% endwith %}
+                            <span id="cart-qty" class="cart-count">
+                            {% with qty_amount=cart|length %}
+                                {{ qty_amount }}
+                            {% endwith %}
                             </span>
                         </a>
                     </li>
