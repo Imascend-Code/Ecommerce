@@ -9,6 +9,16 @@
   <main>
     <div class="row g-5 flex-lg-row flex-column-reverse">
 
+
+
+       <!-- /// Left Column: Product Image -->
+      <div class="col-lg-5">
+        <div class="card border-0 shadow-sm position-relative">
+          <img class="img-fluid p-3 object-fit-contain" src="{{ product.image.url }}" alt="{{ product.title }}" onclick="openLightbox(this.src)" style="cursor: zoom-in;">
+        </div>
+      </div>
+
+
       <!-- /// Right Column: Product Info -->
       <div class="col-lg-7">
         <div class="ps-lg-4">
@@ -20,9 +30,9 @@
           <div class="d-flex align-items-center mb-3">
             <span class="badge bg-primary me-2">{{ product.brand }}</span>
             {% if product.in_stock %}
-              <span class="badge bg-success">In Stock</span>
-            {% else %}
               <span class="badge bg-danger">Out of Stock</span>
+            {% else %}
+              <span class="badge bg-success">In Stock</span>
             {% endif %}
           </div>
 
@@ -75,7 +85,8 @@
 
           <!-- /// Payment Trust Badges -->
           <div class="d-flex flex-wrap gap-3 align-items-center mt-3">
-            <img src="{% static 'img/payment-visa.png' %}" alt="Visa" height="24">
+            <img src="{% static 'img/payment-stripe.png' %}" alt="Visa" height="24">
+            <img src="{% static 'img/payment-flutter-wave.png' %}" alt="Visa" height="24">
             <img src="{% static 'img/payment-mastercard.png' %}" alt="Mastercard" height="24">
             <img src="{% static 'img/payment-paypal.png' %}" alt="PayPal" height="24">
             <span class="text-muted small"><i class="fas fa-shield-alt me-1 text-success"></i>100% Buyer Protection</span>
@@ -84,13 +95,7 @@
         </div>
       </div>
 
-      <!-- /// Left Column: Product Image -->
-      <div class="col-lg-5">
-        <div class="card border-0 shadow-sm position-relative">
-          <img class="img-fluid p-3 object-fit-contain" src="{{ product.image.url }}" alt="{{ product.title }}" onclick="openLightbox(this.src)" style="cursor: zoom-in;">
-        </div>
-      </div>
-
+     
     </div>
   </main>
 </div>
