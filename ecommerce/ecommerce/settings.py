@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from decouple import config
 from pathlib import Path
 
+
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
